@@ -19,7 +19,7 @@ export interface EncodeResult extends ImageDimensions {
   duration: number;
 }
 
-export const MAX_IMAGE_PIXELS = 25_000_000;
+export const MAX_IMAGE_PIXELS = 100_000_000;
 export const MAX_IMAGE_EDGE = 16_383;
 export const MAX_FILE_BYTES = 40 * 1024 * 1024;
 

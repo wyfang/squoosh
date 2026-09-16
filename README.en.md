@@ -52,7 +52,7 @@ Switching images preserves the current zoom mode and centers the new image: fit 
 
 ## Notes
 
-Supported inputs are static PNG, JPEG, WebP, AVIF, and BMP images. Animation is not supported. Each queue accepts up to 30 images and 100 MB of input data in total. Each image is limited to 40 MB, 25 million pixels, and 16383 pixels on either edge. Available browser or device memory may impose further limits; AVIF encoding generally takes longer.
+Supported inputs are static PNG, JPEG, WebP, AVIF, and BMP images. Animation is not supported. Each queue accepts up to 30 images and 100 MB of input data in total. Each image is limited to 40 MB, 100 million pixels, and 16383 pixels on either edge. Successful processing of large images still depends on available browser and device memory; AVIF encoding generally takes longer.
 
 Images are processed in the current browser. This workbench does not upload originals or converted files. The theme preference is saved locally in the browser; reloading or closing the page clears the image queue, so download any results you need to retain. The production host also loads analytics and Cloudflare security scripts; the site as a whole is not an offline-only page.
 

@@ -265,7 +265,7 @@ export function useWorkbench() {
               height = size.height;
               if (!width || !height) throw new Error('图片尺寸无效');
               if (width * height > MAX_IMAGE_PIXELS)
-                throw new Error('图片不能超过 2500 万像素');
+                throw new Error('图片不能超过 1 亿像素');
               if (Math.max(width, height) > MAX_IMAGE_EDGE)
                 throw new Error(`图片边长不能超过 ${MAX_IMAGE_EDGE} 像素`);
             } catch (reason) {

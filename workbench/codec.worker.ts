@@ -109,7 +109,7 @@ function checkDimensions(width: number, height: number): ImageDimensions {
     height > MAX_IMAGE_EDGE ||
     width * height > MAX_IMAGE_PIXELS
   ) {
-    throw new Error('图片不能超过 2500 万像素，单边不能超过 16383 像素');
+    throw new Error('图片不能超过 1 亿像素，单边不能超过 16383 像素');
   }
   return { width, height };
 }
