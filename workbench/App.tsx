@@ -151,6 +151,42 @@ export default function App() {
     };
   }, [add, pick]);
 
+  useEffect(() => {
+    const changeView = (event: KeyboardEvent) => {
+      if (
+        !selected?.url ||
+        event.defaultPrevented ||
+        event.isComposing ||
+        event.keyCode === 229 ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        event.shiftKey ||
+        (event.target instanceof Element &&
+          event.target.closest(
+            'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="spinbutton"], [role="combobox"]',
+          ))
+      )
+        return;
+      const views: Record<string, ViewMode> = {
+        Digit1: 'original',
+        Digit2: 'compare',
+        Digit3: 'output',
+        Numpad1: 'original',
+        Numpad2: 'compare',
+        Numpad3: 'output',
+      };
+      const next = views[event.code];
+      if (event.code.startsWith('Numpad') && event.key !== event.code.slice(-1))
+        return;
+      if (!next || (next !== 'original' && !selected.output?.url)) return;
+      event.preventDefault();
+      setView(next);
+    };
+    window.addEventListener('keydown', changeView, true);
+    return () => window.removeEventListener('keydown', changeView, true);
+  }, [selected?.url, selected?.output?.url]);
+
   const downloadAll = async () => {
     if (!ready.length || exporting) return;
     setExporting(true);
@@ -402,25 +438,34 @@ export default function App() {
               <CompactBrand onFit={() => viewport?.fit()} />
               <ThemeToggle />
             </div>
-            <div className="view-segments" role="group" aria-label="预览模式">
+            <div
+              className="view-segments"
+              role="group"
+              aria-label="预览模式"
+              aria-keyshortcuts="1 2 3"
+            >
               {[
                 { id: 'original', label: '原图', icon: FileImage },
                 { id: 'compare', label: '对比', icon: Columns2 },
                 { id: 'output', label: '结果', icon: ImagePlus },
-              ].map((v) => (
-                <Button
-                  key={v.id}
-                  size="sm"
-                  variant="ghost"
-                  aria-pressed={view === v.id}
-                  isDisabled={
-                    !selected || (v.id !== 'original' && !selected.output?.url)
-                  }
-                  onPress={() => setView(v.id as ViewMode)}
-                >
-                  <v.icon size={14} />
-                  {v.label}
-                </Button>
+              ].map((v, index) => (
+                <Tooltip key={v.id} delay={400}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    aria-pressed={view === v.id}
+                    isDisabled={
+                      !selected || (v.id !== 'original' && !selected.output?.url)
+                    }
+                    onPress={() => setView(v.id as ViewMode)}
+                  >
+                    <v.icon size={14} />
+                    {v.label}
+                  </Button>
+                  <Tooltip.Content>
+                    {v.label} ({index + 1})
+                  </Tooltip.Content>
+                </Tooltip>
               ))}
             </div>
             <ZoomToolbar controls={viewport} disabled={!selected?.url} />
@@ -434,6 +479,7 @@ export default function App() {
                     item={selected}
                     view={view}
                     onControls={setViewport}
+                    initialCamera={viewport?.getCamera()}
                   />
                 ) : (
                   <div className="invalid-preview">

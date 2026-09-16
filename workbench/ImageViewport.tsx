@@ -4,6 +4,7 @@ import { ArrowLeftRight } from 'lucide-react';
 import type { WorkbenchItem } from './useWorkbench';
 import {
   centeredCamera,
+  clampScale,
   visibleImageBounds,
   zoomAt,
   zoomToSelection,
@@ -24,10 +25,17 @@ export interface ViewportControls {
   fill: () => void;
   actual: () => void;
   setPercent: (value: number) => void;
+  getCamera: () => Pick<Camera, 'mode' | 'scale'>;
 }
 
 type Gesture =
-  | { kind: 'pan'; pointerId: number; start: Point; camera: Camera }
+  | {
+      kind: 'pan';
+      pointerId: number;
+      button: number;
+      start: Point;
+      camera: Camera;
+    }
   | { kind: 'split'; pointerId: number; offset: number }
   | {
       kind: 'zoom';
@@ -64,15 +72,35 @@ function midpoint(a: Point, b: Point): Point {
 function distance(a: Point, b: Point) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
+function initialImageCamera(
+  image: Size,
+  viewport: Size,
+  initial: Pick<Camera, 'mode' | 'scale'>,
+): Camera {
+  if (initial.mode !== 'custom')
+    return centeredCamera(image, viewport, initial.mode);
+  const scale =
+    Number.isFinite(initial.scale) && initial.scale > 0
+      ? clampScale(initial.scale)
+      : 1;
+  return {
+    x: (viewport.width - image.width * scale) / 2,
+    y: (viewport.height - image.height * scale) / 2,
+    scale,
+    mode: 'custom',
+  };
+}
 
 export default function ImageViewport({
   item,
   view,
   onControls,
+  initialCamera,
 }: {
   item: WorkbenchItem;
   view: ViewMode;
   onControls: (controls: ViewportControls) => void;
+  initialCamera?: Pick<Camera, 'mode' | 'scale'>;
 }) {
   const viewport = useRef<HTMLDivElement>(null);
   const originalPlane = useRef<HTMLDivElement>(null);
@@ -80,8 +108,14 @@ export default function ImageViewport({
   const resultClip = useRef<HTMLDivElement>(null);
   const splitHandle = useRef<HTMLButtonElement>(null);
   const selection = useRef<HTMLDivElement>(null);
+  // This seed belongs to this image. Subsequent control reports must not
+  // reinitialize the camera during a render or an output/view change.
+  const initialOptions = useRef(
+    initialCamera ? { ...initialCamera } : { mode: 'fit' as const, scale: 1 },
+  );
   const camera = useRef<Camera>({ x: 0, y: 0, scale: 1, mode: 'fit' });
-  const bounds = useRef<Size>({ width: 1, height: 1 });
+  const cameraReady = useRef(false);
+  const bounds = useRef<Size>({ width: 0, height: 0 });
   const dimensions = useRef<Size>({ width: item.width, height: item.height });
   const split = useRef(0.5);
   const gesture = useRef<Gesture | null>(null);
@@ -98,6 +132,7 @@ export default function ImageViewport({
 
   const draw = useCallback(() => {
     frame.current = null;
+    if (!cameraReady.current) return;
     const current = camera.current;
     const transform = `translate3d(${current.x}px, ${current.y}px, 0) scale(${current.scale})`;
     for (const element of [originalPlane.current, resultPlane.current]) {
@@ -238,21 +273,45 @@ export default function ImageViewport({
     (value: number) => changeZoom(value / 100),
     [changeZoom],
   );
-  methods.current = { zoomIn, zoomOut, fit, fill, actual, setPercent };
+  const getCamera = useCallback(() => {
+    const { mode, scale } = camera.current;
+    return { mode, scale };
+  }, []);
+  methods.current = { zoomIn, zoomOut, fit, fill, actual, setPercent, getCamera };
 
   useLayoutEffect(() => {
     const element = viewport.current!;
+    let needsInitialCamera = true;
+    cameraReady.current = false;
+    cancelGesture();
     const measure = () => {
       const next = { width: element.clientWidth, height: element.clientHeight };
       if (!next.width || !next.height) return;
       const previous = bounds.current;
-      if (next.width === previous.width && next.height === previous.height)
+      if (
+        !needsInitialCamera &&
+        next.width === previous.width &&
+        next.height === previous.height
+      )
         return;
       // Gesture snapshots use the old viewport coordinates. Finish them before
       // recentering, so their next event cannot restore the previous camera.
       cancelGesture();
       bounds.current = next;
-      if (camera.current.mode === 'fit' || camera.current.mode === 'fill') {
+      if (needsInitialCamera) {
+        camera.current = initialImageCamera(
+          dimensions.current,
+          next,
+          initialOptions.current,
+        );
+        split.current = 0.5;
+        lastControls.current = null;
+        needsInitialCamera = false;
+        cameraReady.current = true;
+      } else if (
+        camera.current.mode === 'fit' ||
+        camera.current.mode === 'fill'
+      ) {
         camera.current = centeredCamera(
           dimensions.current,
           next,
@@ -271,15 +330,10 @@ export default function ImageViewport({
     const observer = new ResizeObserver(measure);
     observer.observe(element);
     return () => observer.disconnect();
-  }, [cancelGesture, invalidate]);
-
+  }, [item.id, item.width, item.height, cancelGesture, invalidate]);
   useLayoutEffect(() => {
     cancelGesture();
-    camera.current = centeredCamera(dimensions.current, bounds.current, 'fit');
-    split.current = 0.5;
-    lastControls.current = null;
-    invalidate();
-  }, [item.id, item.width, item.height, cancelGesture, invalidate]);
+  }, [view, cancelGesture]);
   useLayoutEffect(() => {
     invalidate();
   }, [view, item.output?.url, invalidate]);
@@ -374,6 +428,7 @@ export default function ImageViewport({
     window.addEventListener('blur', reset);
     document.addEventListener('visibilitychange', visibility);
     return () => {
+      reset();
       element.removeEventListener('wheel', wheel);
       window.removeEventListener('keydown', keydown, true);
       window.removeEventListener('keyup', keyup, true);
@@ -400,7 +455,7 @@ export default function ImageViewport({
     invalidate();
   };
   const pointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0 && event.button !== 1) return;
+    if (event.button !== 0 && event.button !== 1 && event.button !== 2) return;
     const point = pointOf(event);
     event.preventDefault();
     viewport.current!.dataset.pointerFocus = 'true';
@@ -427,10 +482,11 @@ export default function ImageViewport({
         return;
       }
     }
-    if (keys.current.space || event.button === 1) {
+    if (keys.current.space || event.button === 1 || event.button === 2) {
       gesture.current = {
         kind: 'pan',
         pointerId: event.pointerId,
+        button: event.button,
         start: point,
         camera: { ...camera.current },
       };
@@ -460,6 +516,7 @@ export default function ImageViewport({
       gesture.current = {
         kind: 'pan',
         pointerId: event.pointerId,
+        button: event.button,
         start: point,
         camera: { ...camera.current },
       };
@@ -490,9 +547,16 @@ export default function ImageViewport({
     }
     if (active.pointerId !== event.pointerId) return;
     if (active.kind === 'pan') {
+      const buttonMask = active.button === 2 ? 2 : active.button === 1 ? 4 : 1;
+      if (event.pointerType === 'mouse' && !(event.buttons & buttonMask)) {
+        // A mouse chord can release the drag button without a pointerup.
+        // Stop before applying movement from a button that is no longer held.
+        cancelGesture();
+        return;
+      }
       changeCamera({
         ...active.camera,
-        mode: 'custom',
+        mode: active.camera.mode === 'actual' ? 'actual' : 'custom',
         x: active.camera.x + point.x - active.start.x,
         y: active.camera.y + point.y - active.start.y,
       });
@@ -553,6 +617,7 @@ export default function ImageViewport({
       gesture.current = {
         kind: 'pan',
         pointerId,
+        button: 0,
         start: point,
         camera: { ...camera.current },
       };
@@ -584,7 +649,7 @@ export default function ImageViewport({
       ref={viewport}
       className="iv-viewport"
       role="region"
-      aria-label="图片画布。滚轮缩放；Shift 加 1 适应画布，Shift 加 0 原始像素；按住 Z 点击或框选放大，Z 加 Alt 点击缩小；空格拖动平移。"
+      aria-label="图片画布。滚轮缩放；Shift 加 1 适应画布，Shift 加 0 原始像素；按住 Z 点击或框选放大，Z 加 Alt 点击缩小；右键、中键或空格拖动平移。"
       aria-keyshortcuts="Shift+1 Shift+0"
       tabIndex={0}
       onPointerDown={pointerDown}
@@ -602,9 +667,8 @@ export default function ImageViewport({
         // otherwise the next touch would pinch against a phantom old pointer.
         if (tracked) endPointer(event, true);
       }}
-      onAuxClick={(event) => {
-        if (event.button === 1) event.preventDefault();
-      }}
+      onContextMenu={(event) => event.preventDefault()}
+      onAuxClick={(event) => event.preventDefault()}
       onDragStart={(event) => event.preventDefault()}
     >
       <div className="iv-image-plane" ref={originalPlane} style={planeStyle}>

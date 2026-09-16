@@ -32,7 +32,7 @@ npm run preview -- --port 4178 --strictPort
 
 The build preview is available at `http://127.0.0.1:4178/squoosh/`. Build output is written to `dist/`, with the asset base path set to `/squoosh/`. Builds reuse the Squoosh WASM encoders retained in the repository; rebuilding each codec locally is not required.
 
-Use the following canvas controls. Keyboard shortcuts do not take over input while an input field is focused. Canvas zoom only changes the preview; the size controls in the right panel determine the exported pixel dimensions.
+Use the following canvas controls. Keyboard shortcuts do not take over input while an input field is focused. Press `1`, `2`, or `3` on its own to switch views; combinations with `Shift`, `Ctrl`, `Alt`, or `Command` do not switch views. Canvas zoom only changes the preview; the size controls in the right panel determine the exported pixel dimensions.
 
 | Action | Result |
 | --- | --- |
@@ -40,10 +40,15 @@ Use the following canvas controls. Keyboard shortcuts do not take over input whi
 | Hold `Z` and click | Zoom in |
 | Hold `Z` + `Alt` and click | Zoom out |
 | Hold `Z` and drag | Select an area to magnify |
-| Hold Space and drag, or drag with the middle mouse button | Pan the image |
+| Hold Space and drag, or drag with the middle or right mouse button | Pan the image |
+| `1` | Original view |
+| `2` | Comparison view |
+| `3` | Result view |
 | `Shift` + `1` | Fit the image to the canvas |
 | `Shift` + `0` | Display original pixels at `1:1` |
 | `Esc` | Cancel the current selection box |
+
+Switching images preserves the current zoom mode and centers the new image: fit mode recalculates the scale for the new image, original-pixel mode stays at `1:1`, and custom zoom keeps the current scale. Switching views or re-encoding the same image preserves its zoom and pan position.
 
 ## Notes
 
