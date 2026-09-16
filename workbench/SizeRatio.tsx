@@ -31,7 +31,10 @@ export default function SizeRatio({
   const larger = available && current > original;
   const scale = Math.max(original, current ?? 0, 1);
   const width = available ? ((current ?? 0) / scale) * 100 : 0;
-  const pendingWidth = available ? (pendingBytes / scale) * 100 : 0;
+  const originalWidth = (original / scale) * 100;
+  const pendingWidth = available
+    ? (Math.max(0, Math.min(pendingBytes, current ?? 0)) / scale) * 100
+    : 0;
   const result = available
     ? bytes(current)
     : status === 'error'
@@ -40,6 +43,9 @@ export default function SizeRatio({
         ? '等待中'
         : '处理中';
   const label = ratio === null ? '—' : percentage(ratio);
+  const caption = larger && ratio !== null
+    ? `${Number((ratio / 100).toFixed(2))} 倍`
+    : label;
   const description = available
     ? `原图 ${bytes(original)}，${summary ? '当前合计' : '转换后'} ${result}，原图的 ${label}${larger ? '，体积增加' : ''}`
     : `原图 ${bytes(original)}，${result}`;
@@ -64,10 +70,17 @@ export default function SizeRatio({
         aria-valuenow={ratio ?? undefined}
         aria-valuetext={ratio === null ? undefined : description}
       >
-        {width > 0 && (
+        {width > 0 && !larger && (
           <span
             className="size-ratio-fill"
             style={{ width: `${width}%` }}
+            aria-hidden="true"
+          />
+        )}
+        {larger && (
+          <span
+            className="size-ratio-growth"
+            style={{ left: `${originalWidth}%`, width: `${100 - originalWidth}%` }}
             aria-hidden="true"
           />
         )}
@@ -81,13 +94,6 @@ export default function SizeRatio({
             aria-hidden="true"
           />
         )}
-        {larger && original > 0 && (
-          <span
-            className="size-ratio-reference"
-            style={{ left: `${(original / scale) * 100}%` }}
-            aria-hidden="true"
-          />
-        )}
         <span className="size-ratio-values">
           <span>{bytes(original)}</span>
           <ChevronRight size={10} aria-hidden="true" />
@@ -97,8 +103,8 @@ export default function SizeRatio({
         </span>
       </span>
       <span className="size-ratio-caption">
-        <span>{original > 0 ? '原图 100%' : '原图'}</span>
-        <b>{available ? label : '—'}</b>
+        <span>{larger ? '原图的' : original > 0 ? '原图 100%' : '原图'}</span>
+        <b>{available ? caption : '—'}</b>
       </span>
     </span>
   );

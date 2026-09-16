@@ -28,6 +28,11 @@ html[data-theme='light'] {
   --wb-success: #3164b4;
   --wb-success-soft: #eef4ff;
   --wb-warning: #93651f;
+  --wb-ratio-track: #e6eaf1;
+  --wb-ratio-border: #cbd4e1;
+  --wb-ratio-fill: #94b8ef;
+  --wb-ratio-growth: #edc88e;
+  --wb-ratio-foreground: #293b55;
   --wb-danger: #a95645;
   --wb-danger-border: #eacfc5;
   --wb-canvas: #f5f7fa;
@@ -80,6 +85,11 @@ html[data-theme='dark'] {
   --wb-success: #91b6ee;
   --wb-success-soft: #293447;
   --wb-warning: #dbb37d;
+  --wb-ratio-track: #343940;
+  --wb-ratio-border: #505965;
+  --wb-ratio-fill: #435f87;
+  --wb-ratio-growth: #77562e;
+  --wb-ratio-foreground: #edf3fb;
   --wb-danger: #e6a18f;
   --wb-danger-border: #705048;
   --wb-canvas: #191919;
