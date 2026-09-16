@@ -2,7 +2,7 @@
 
 基于 GoogleChromeLabs Squoosh 的个人修改版，在浏览器中批量压缩、转换和比较图片，使用 React 19、HeroUI 3、Tailwind CSS 4 与 Vite 7 构建交互工作台。
 
-[上游项目](https://github.com/GoogleChromeLabs/squoosh) · [English](./README.en.md)
+[在线使用](https://play.wangyifang.com/squoosh/) · [上游项目](https://github.com/GoogleChromeLabs/squoosh) · [English](./README.en.md)
 
 ## 功能
 
@@ -49,11 +49,11 @@ npm run preview -- --port 4178 --strictPort
 
 当前支持静态 PNG、JPEG、WebP、AVIF、BMP 输入，不支持动画。一次最多加入 30 张图片，输入总量不超过 100 MB；单张不超过 40 MB、2500 万像素，任一边不超过 16383 像素。浏览器或设备的可用内存仍可能限制处理能力，AVIF 编码通常耗时更长。
 
-图片仅在当前浏览器中处理，本工作台不上传原图或转换结果。主题偏好保存在浏览器本地；刷新或关闭页面会清空图片队列，应先下载需要保留的结果。此说明仅适用于工作台自身；未来宿主站点的访问统计和其他外部资源需要独立核对。
+图片仅在当前浏览器中处理，本工作台不上传原图或转换结果。主题偏好保存在浏览器本地；刷新或关闭页面会清空图片队列，应先下载需要保留的结果。线上宿主站点另行加载访问统计和 Cloudflare 安全脚本，不能将整站视为离线页面。
 
 修改基于上游提交 `e8d35e0fb66eb16eff6fe8fc773eabcbb7128de3`。原应用源码及编解码器保留在 `src/`、`codecs/` 等原目录，原说明和依赖配置保留为 [README.upstream.md](./README.upstream.md)、[package.upstream.json](./package.upstream.json) 与 [package-lock.upstream.json](./package-lock.upstream.json)。当前入口在 `workbench/`，`npm run build` 构建的是新的工作台。
 
-此源码仓库的 CI 在 Linux 和 Windows 上安装依赖并验证构建，不执行部署。本修改版尚未部署到生产站点。后续发布到 `play.wangyifang.com` 是独立步骤：将 `dist/` 同步到该站点仓库的 `squoosh/` 目录，再由该站点的 GitHub `main` 分支触发 Cloudflare Workers Builds。
+此源码仓库的 CI 在 Linux 和 Windows 上安装依赖并验证构建，不执行部署。生产发布由独立站点仓库 `play.wangyifang.com` 负责：其 `sync:squoosh` 脚本将本仓库的 `dist/` 同步到站点的 `squoosh/` 目录，随后将站点改动提交并推送到 `main`，触发 Cloudflare Workers Builds 自动部署。
 
 ## 版权说明
 
