@@ -726,49 +726,27 @@ kbd {
 .resize-presets {
   margin-top: 8px;
 }
-.aspect-lock {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
 .dimension-preview {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  margin-top: 12px;
+  margin-top: 14px;
   color: var(--wb-text-faint);
+  font-size: 10px;
 }
-.dimension-preview > div {
-  flex: 1;
-  min-width: 0;
-}
-.dimension-preview small {
-  display: block;
-  font-size: 9px;
-  margin-bottom: 7px;
-}
-.dimension-preview strong {
+.dimension-preview output {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 33px;
+  gap: 6px;
   font-size: 11px;
   color: var(--wb-text-muted);
-  font-weight: 400;
   font-variant-numeric: tabular-nums;
-  padding: 0 9px;
-  background: var(--wb-control-muted);
-  border: 1px solid var(--wb-border-subtle);
-  border-radius: 5px;
+  white-space: nowrap;
 }
-.dimension-preview strong span {
+.dimension-separator,
+.dimension-unit {
   color: var(--wb-text-faint);
-  font-size: 9px;
-}
-.dimension-preview > svg {
-  margin-top: 18px;
-  flex-shrink: 0;
 }
 .batch-section {
   border-bottom: none;

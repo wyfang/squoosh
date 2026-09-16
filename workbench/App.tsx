@@ -10,7 +10,6 @@ import {
   FileImage,
   ImagePlus,
   Layers2,
-  LockKeyhole,
   Plus,
   RotateCcw,
   Settings2,
@@ -739,37 +738,25 @@ export default function App() {
                 ))}
               </div>
               <div className="dimension-preview">
-                <div>
-                  <small>宽度</small>
-                  <strong>
-                    {selected
-                      ? Math.max(
-                          1,
-                          Math.round((selected.width * settings.scale) / 100),
-                        )
-                      : '—'}
-                    <span>px</span>
-                  </strong>
-                </div>
-                <span
-                  className="aspect-lock"
-                  title="保持原图宽高比"
-                  aria-label="保持原图宽高比"
-                >
-                  <LockKeyhole size={12} aria-hidden="true" />
-                </span>
-                <div>
-                  <small>高度</small>
-                  <strong>
-                    {selected
-                      ? Math.max(
-                          1,
-                          Math.round((selected.height * settings.scale) / 100),
-                        )
-                      : '—'}
-                    <span>px</span>
-                  </strong>
-                </div>
+                <span>输出尺寸</span>
+                <output aria-label="输出像素尺寸">
+                  {selected ? (
+                    <>
+                      {Math.max(
+                        1,
+                        Math.round((selected.width * settings.scale) / 100),
+                      )}
+                      <span className="dimension-separator">×</span>
+                      {Math.max(
+                        1,
+                        Math.round((selected.height * settings.scale) / 100),
+                      )}
+                      <span className="dimension-unit">px</span>
+                    </>
+                  ) : (
+                    '—'
+                  )}
+                </output>
               </div>
             </section>
             <section className="control-section batch-section">
