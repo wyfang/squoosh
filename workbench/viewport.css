@@ -1,0 +1,166 @@
+.iv-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: contain;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+  contain: layout paint;
+}
+.iv-viewport:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--wb-focus-soft);
+}
+.iv-viewport[data-pointer-focus='true']:focus-visible {
+  box-shadow: none;
+}
+.iv-image-plane {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  pointer-events: none;
+  background-color: var(--wb-checker-base);
+  background-image:
+    linear-gradient(45deg, var(--wb-checker) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--wb-checker) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--wb-checker) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--wb-checker) 75%);
+  background-size: 16px 16px;
+  background-position:
+    0 0,
+    0 8px,
+    8px -8px,
+    -8px 0;
+}
+.iv-image-plane img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+.iv-result-clip {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.iv-split {
+  position: absolute;
+  z-index: 2;
+  width: 28px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--wb-text-secondary);
+  transform: translateX(-50%);
+  cursor: ew-resize;
+  touch-action: none;
+  outline: none;
+}
+.iv-split::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 0.5px);
+  width: 1px;
+  background: var(--wb-split-line);
+  box-shadow: 0 0 0 1px var(--wb-split-shadow);
+}
+.iv-split > span {
+  position: absolute;
+  top: 50%;
+  left: calc(50% + var(--iv-knob-offset, 0px));
+  display: grid;
+  place-items: center;
+  width: var(--iv-knob-size, 32px);
+  height: var(--iv-knob-size, 32px);
+  border: 1px solid var(--wb-border-strong);
+  border-radius: 50%;
+  background: var(--wb-control);
+  box-shadow: 0 2px 8px var(--wb-shadow);
+  transform: translate(-50%, -50%);
+}
+.iv-split:focus-visible {
+  /* Keep the focus indicator on the thumb, never the full-height hit area. */
+  outline: none;
+  outline-offset: 0;
+}
+.iv-split:focus-visible > span {
+  outline: 2px solid var(--focus);
+  outline-offset: -3px;
+}
+.iv-split > span > svg {
+  max-width: 60%;
+  max-height: 60%;
+}
+.iv-split[data-pointer-focus='true']:focus-visible > span {
+  outline: none;
+}
+.iv-split:active > span {
+  outline: none;
+}
+.iv-viewport[data-tool='zoom'] .iv-split,
+.iv-viewport[data-tool='pan'] .iv-split {
+  cursor: inherit;
+}
+.iv-label {
+  position: absolute;
+  z-index: 3;
+  top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 10px;
+  border: 1px solid var(--wb-border);
+  border-radius: 5px;
+  background: var(--wb-label);
+  color: var(--wb-text-secondary);
+  box-shadow: 0 2px 5px var(--wb-shadow-soft);
+  font-size: 10px;
+  font-weight: 500;
+  pointer-events: none;
+}
+.iv-label span {
+  color: var(--wb-text-muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+}
+.iv-label-left {
+  left: 20px;
+}
+.iv-label-right {
+  right: 20px;
+}
+.iv-selection {
+  display: none;
+  position: absolute;
+  z-index: 4;
+  border: 1px solid var(--wb-selection-border);
+  outline: 1px solid var(--focus);
+  background: var(--wb-selection);
+  pointer-events: none;
+}
+@media (max-width: 600px) {
+  .iv-label {
+    top: 12px;
+    padding: 5px 7px;
+    font-size: 9px;
+    gap: 5px;
+  }
+  .iv-label-left {
+    left: 12px;
+  }
+  .iv-label-right {
+    right: 12px;
+  }
+  .iv-split {
+    width: 40px;
+  }
+}

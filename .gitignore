@@ -1,4 +1,7 @@
 .tmp
+dist
+output
+.playwright-cli
 node_modules
 *.scss.d.ts
 *.css.d.ts
