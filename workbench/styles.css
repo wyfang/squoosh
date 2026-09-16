@@ -1341,6 +1341,20 @@ kbd {
   height: 37px;
   min-height: 37px;
 }
+.export-primary-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+.export-primary-actions.has-copy {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+}
+.export-primary-actions.has-copy .button {
+  min-width: 0;
+  padding: 0 8px;
+  gap: 6px;
+  font-size: 11px;
+}
 .export-actions .batch-download {
   max-width: none;
   width: 100%;

@@ -11,6 +11,7 @@ A personal modification of GoogleChromeLabs Squoosh for batch image compression,
 - Adjust output dimensions with a HeroUI slider or percentage input from `1%` to `100%` in `1%` increments. Use `25%`, `50%`, `75%`, and `100%` presets while scaling width and height together.
 - Switch between original, comparison, and result views, and drag the divider to inspect differences. Zoom with the mouse, magnify a selected area, and pan the image.
 - View before-and-after file sizes, size ratios, and increases or savings for individual images and the queue. Download individual files or export completed results as a ZIP archive.
+- Selecting PNG output shows a copy button that writes the current PNG result directly to the clipboard. Other output formats do not show this button and are not transcoded for copying.
 - Blue accents with dark and light themes and a saved theme preference. The interface uses HeroUI React components, with image decoding and encoding performed in browser workers.
 
 ## Usage
@@ -53,6 +54,8 @@ Switching images preserves the current zoom mode and centers the new image: fit 
 ## Notes
 
 Supported inputs are static PNG, JPEG, WebP, AVIF, and BMP images. Animation is not supported. Each queue accepts up to 30 images and 100 MB of input data in total. Each image is limited to 40 MB, 100 million pixels, and 16383 pixels on either edge. Successful processing of large images still depends on available browser and device memory; AVIF encoding generally takes longer.
+
+Copying images uses the browser clipboard API and requires a browser that supports writing images over HTTPS or on localhost. Whether pasting works depends on the destination application. The system or destination application may rewrite clipboard images, so pasted files are not guaranteed to have the same bytes or file size as the downloaded PNG.
 
 Images are processed in the current browser. This workbench does not upload originals or converted files. The theme preference is saved locally in the browser; reloading or closing the page clears the image queue, so download any results you need to retain. The production host also loads analytics and Cloudflare security scripts; the site as a whole is not an offline-only page.
 

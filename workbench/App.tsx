@@ -26,6 +26,7 @@ import ZoomToolbar from './ZoomToolbar';
 import SettingNumberInput from './SettingNumberInput';
 import ThemeToggle from './ThemeToggle';
 import SizeRatio from './SizeRatio';
+import CopyImageButton from './CopyImageButton';
 import {
   type EncodeSettings as Settings,
   type OutputFormat as Format,
@@ -826,15 +827,30 @@ export default function App() {
               )}
             </div>
             <div className="export-actions">
-              <Button
-                fullWidth
-                className="single-download"
-                onPress={download}
-                isDisabled={selected?.status !== 'ready'}
+              <div
+                className={`export-primary-actions ${settings.format === 'png' ? 'has-copy' : ''}`}
               >
-                <ArrowDownToLine size={16} />
-                导出当前图片
-              </Button>
+                <Button
+                  fullWidth
+                  className="single-download"
+                  onPress={download}
+                  isDisabled={selected?.status !== 'ready'}
+                >
+                  <ArrowDownToLine size={16} />
+                  导出当前图片
+                </Button>
+                {settings.format === 'png' && (
+                  <CopyImageButton
+                    key={selected?.id ?? 'empty'}
+                    blob={
+                      selected?.status === 'ready'
+                        ? selected.output?.blob
+                        : undefined
+                    }
+                    onError={setLocalError}
+                  />
+                )}
+              </div>
               {wb.items.length > 1 && (
                 <Button
                   fullWidth
