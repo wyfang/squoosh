@@ -1,0 +1,42 @@
+<!doctype html>
+<html
+  lang="zh-CN"
+  class="dark"
+  data-theme="dark"
+  style="color-scheme: dark; background-color: #191919"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#191919" />
+    <script>
+      (() => {
+        let theme = 'dark';
+        try {
+          const saved = localStorage.getItem('squoosh-theme');
+          if (saved === 'dark' || saved === 'light') theme = saved;
+        } catch {}
+        const color = theme === 'dark' ? '#191919' : '#f7f8fa';
+        const root = document.documentElement;
+        root.classList.remove('dark', 'light');
+        root.classList.add(theme);
+        root.dataset.theme = theme;
+        root.style.colorScheme = theme;
+        root.style.backgroundColor = color;
+        document
+          .querySelector('meta[name="theme-color"]')
+          .setAttribute('content', color);
+      })();
+    </script>
+    <meta
+      name="description"
+      content="Squoosh 图片工作台。在本地压缩、转换、比较和批量导出图片。"
+    />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <title>Squoosh · 图片工作台</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/workbench/main.tsx"></script>
+  </body>
+</html>
